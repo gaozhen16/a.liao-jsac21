@@ -114,7 +114,7 @@ Jacobian_Mat_Azi_Ele_AC = Gene_Jacobian_Mat_Azi_Ele(miu_AC_set_init, niu_AC_set_
 Jacobian_Mat_tau = Gene_Jacobian_Mat_tau(miu_tau_set_init, K, 1, D_subc, L);
 
 %% set snr
-iterMax = 2e2;
+iterMax = 2e3;
 Power_Tx_dBm = 80:5:150;
 Ptx_gain = ones(1,length(Power_Tx_dBm));
 SNR_dBs = -50:10:30;

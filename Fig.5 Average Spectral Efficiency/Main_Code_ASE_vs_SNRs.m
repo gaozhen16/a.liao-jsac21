@@ -458,8 +458,7 @@ plot(SNR_dBs,ASE_Per_CSI_No_TrSq,'-bd','LineWidth',LineWidth,'MarkerSize',Marker
 plot(SNR_dBs,ASE_Per_CSI_TrSq,'-r^','LineWidth',LineWidth,'MarkerSize',MarkerSize);
 plot(SNR_dBs,ASE_Est_CSI_No_TrSq,'-mp','LineWidth',LineWidth,'MarkerSize',MarkerSize);
 plot(SNR_dBs,ASE_Est_CSI_TrSq,'-ko','LineWidth',LineWidth,'MarkerSize',MarkerSize);
-xlabel('Number of CCT','Fontsize',Fontsize),ylabel('NMSE','Fontsize',Fontsize);
-title('NMSE vs CCT at -20 dB','Fontsize',Fontsize);
+xlabel('SNR [dB]','Fontsize',18); ylabel('Average Spectral Efficiency [bit/s/Hz]','Fontsize',18);
 set(gca, 'GridLineStyle', '-.','FontSize',Fontsize, 'linewidth',1.5,'Fontname','Times New Roman');
 set(gcf, 'position', [700 300 700 500]); axis normal;
 h2 = legend('Perfect CSI + no triple squint','Perfect CSI + triple squint',...

@@ -52,12 +52,12 @@ else
 end
 [K_miu_BS_Re,K_miu_BS_Im,K_niu_BS_Re,K_niu_BS_Im] = A0_Gene_2D_ESPRIT_Para(I_BS_h_bar,I_BS_v_bar);
 [K_miu_AC_Re,K_miu_AC_Im,K_niu_AC_Re,K_niu_AC_Im] = A0_Gene_2D_ESPRIT_Para(I_AC_h_bar,I_AC_v_bar);
-N_BS_Comp_h = 2; N_BS_Comp_v = N_BS_Comp_h;
+N_BS_Comp_h = 5; N_BS_Comp_v = N_BS_Comp_h;
 N_BS_Comp = N_BS_Comp_h*N_BS_Comp_v;
 M_BS_Comp_h = N_BS_h/N_BS_Comp_h; M_BS_Comp_v = N_BS_v/N_BS_Comp_v;
 M_BS_Comp = M_BS_Comp_h*M_BS_Comp_v;
 Index_BS_Ant_Comp = A0_Gene_Index_Antenna_Comp(N_BS_Comp,M_BS_Comp,N_BS_Comp_h,N_BS_Comp_v,M_BS_Comp_h,N_BS_h,N_BS_v);
-N_AC_Comp_h = 2; N_AC_Comp_v = N_AC_Comp_h;
+N_AC_Comp_h = 5; N_AC_Comp_v = N_AC_Comp_h;
 N_AC_Comp = N_AC_Comp_h*N_AC_Comp_v;
 M_AC_Comp_h = M_AC_h/N_AC_Comp_h; M_AC_Comp_v = M_AC_v/N_AC_Comp_v;
 M_AC_Comp = M_AC_Comp_h*M_AC_Comp_v;
@@ -77,7 +77,8 @@ F_temp = F_temp_set(rand_num);
 Coo_BS1_A = [0,0,D].';
 Coo_BS2_B = [0,G,D].';
 Coo_Air_C_init = [E_temp,F_temp,0].';
-Distance_init(1) = norm(Coo_BS1_A-Coo_Air_C_init); Distance_init(2) = norm(Coo_BS2_B-Coo_Air_C_init);
+Distance_init(1) = norm(Coo_BS1_A-Coo_Air_C_init);
+Distance_init(2) = norm(Coo_BS2_B-Coo_Air_C_init);
 G_ls_init = G_AC*G_BS*lambda_z^2./(4*pi*Distance_init).^2;
 unit_d = unit_d_set(:,rand_num);
 vt_vec = vt*unit_d;
@@ -107,8 +108,6 @@ N_OFDM = N_OFDM_Angle_Est + N_OFDM_Doppler + N_OFDM_Delay;
 T_CCT = N_OFDM*T_sym;
 niu_Doppler_init = 2*pi*Doppler_z_init*T_sym;
 m_CCT_init = 1;
-Doppler_diff = Doppler_z_init*1e-1;
-Doppler_z_init_error = Doppler_z_init+Doppler_diff;
 n_ofdm_doppler = 1:N_OFDM_Doppler;
 Phase_Doppler_Dop_set = 2*pi*Doppler_z_init*T_sym*((n_ofdm_doppler-1)+(m_CCT_init-1)*N_OFDM);
 Angle_diff = deg2rad(5);
@@ -131,6 +130,7 @@ sigma2_no = 1e-3*10^(sigma2_NSD/10)*BW;
 sigma_no = sqrt(sigma2_no);
 snr_0_set = [-20,20];
 MSE_Delay_set_temp_0 = zeros(length(SNR_dBs),length(snr_0_set));
+CRB_Delay_set = zeros(length(SNR_dBs),length(snr_0_set));
 MSE_Delay_set_temp_1 = zeros(length(SNR_dBs),length(snr_0_set));
 
 %% 
@@ -150,9 +150,9 @@ for snr_bs_0 = 1:length(snr_0_set)
         a_vec_AC_init_ll_error = A0_Array_Response_Vector(N_AC_h,N_AC_v,Azi_AC_set_init_error(bs_ll_0),Ele_AC_set_init_error(bs_ll_0));
         a_vec_BS_init_ll_error = A0_Array_Response_Vector(N_BS_h,N_BS_v,Azi_BS_set_init_error(bs_ll_0),Ele_BS_set_init_error(bs_ll_0));
         f_RF_AC_init_ll = zeros(N_AC,1);
-        f_RF_AC_init_ll(Index_W_RF_Sub_Array(:,bs_ll_0)) = Quantize(a_vec_AC_init_ll_error(Index_W_RF_Sub_Array(:,bs_ll_0)),N_bits)/sqrt(M_AC);
+        f_RF_AC_init_ll(Index_W_RF_Sub_Array(:,bs_ll_0)) = Quantize(a_vec_AC_init_ll_error(Index_W_RF_Sub_Array(:,bs_ll_0)),N_bits)/sqrt(M_AC); % 
         Equ_a_AC_ll_init = a_vec_AC_init_ll'*f_RF_AC_init_ll;
-        Subarray_BS_ll_init = Quantize(a_vec_BS_init_ll_error(Index_W_RF_BS_Angle(:,1)),N_bits)/sqrt(N_BS_bar);
+        Subarray_BS_ll_init = Quantize(a_vec_BS_init_ll_error(Index_W_RF_BS_Angle(:,1)),N_bits)/sqrt(N_BS_bar); % 
         for nn_bs = 1:N_OFDM_BS_angle
             w_RF_BS_init_ll_nn = zeros(N_BS,1);
             w_RF_BS_init_ll_nn(Index_W_RF_BS_Angle(:,nn_bs)) = Subarray_BS_ll_init;
@@ -165,6 +165,7 @@ for snr_bs_0 = 1:length(snr_0_set)
         k_index_com,Power_Tx_ii,sigma_no_0,awgn_en,K_miu_BS_Re, K_miu_BS_Im, K_niu_BS_Re, K_niu_BS_Im, ...
         Ptx_gain_ii,Delta_BS,miu_BS_set_init_error,niu_BS_set_init_error,s_BS_angle_set);
 end
+
 Est_Azi_AC_set_02 = zeros(L,length(snr_0_set)); Est_Ele_AC_set_02 = zeros(L,length(snr_0_set));
 f_RF_BS_init_set_0 = zeros(N_BS,L,length(snr_0_set));
 for snr_ac_0 = 1:length(snr_0_set)
@@ -188,13 +189,14 @@ for snr_ac_0 = 1:length(snr_0_set)
         tau_init,fs,k_index_com,Power_Tx_ii,sigma_no_0,awgn_en,K_miu_AC_Re,K_miu_AC_Im,K_niu_AC_Re,K_niu_AC_Im,...
         Ptx_gain_ii,Delta_AC,miu_AC_set_init_error,niu_AC_set_init_error,s_AC_angle_set);
 end
+
 Est_Doppler_set_02 = zeros(L,length(snr_0_set)); w_RF_AC_init_set_0 = zeros(N_AC,L,length(snr_0_set));
 H_Beam_Alignment_Doppler_set_0 = zeros(1,L,length(snr_0_set));
 for snr_dop_0 = 1:length(snr_0_set)
     for ll_dop_0 = 1:L
         a_vec_AC_init_ll_est = A0_Array_Response_Vector(N_AC_h,N_AC_v,Est_Azi_AC_set_02(ll_dop_0,snr_dop_0),Est_Ele_AC_set_02(ll_dop_0,snr_dop_0));
         w_RF_AC_init_ll = zeros(N_AC,1);
-        w_RF_AC_init_ll(Index_W_RF_Sub_Array(:,ll_dop_0)) = Quantize(a_vec_AC_init_ll_est(Index_W_RF_Sub_Array(:,ll_dop_0)),N_bits)/sqrt(M_AC);
+        w_RF_AC_init_ll(Index_W_RF_Sub_Array(:,ll_dop_0)) = Quantize(a_vec_AC_init_ll_est(Index_W_RF_Sub_Array(:,ll_dop_0)),N_bits)/sqrt(M_AC); % 
         w_RF_AC_init_set_0(:,ll_dop_0,snr_dop_0) = w_RF_AC_init_ll;
         Equ_a_BS_ll_init_dop = a_vec_BS_init_set(:,ll_dop_0)'*f_RF_BS_init_set_0(:,ll_dop_0,snr_dop_0);
         Equ_a_AC_ll_init_dop = w_RF_AC_init_ll'*a_vec_AC_init_set(:,ll_dop_0);
@@ -204,6 +206,8 @@ for snr_dop_0 = 1:length(snr_0_set)
     [~,Est_Doppler_set_02(:,snr_dop_0)] = A3_Est_Dopple_V1(H_Beam_Alignment_Doppler_set_0(:,:,snr_dop_0),G_ls_init,alpha_init,Phase_Doppler_Dop_set,...
         tau_init,fs,k_index_com,N_OFDM_Doppler,Power_Tx_ii,sigma_no_0,awgn_en,Ptx_gain_ii,T_sym,s_dop_set);
 end
+
+%%
 H_Beam_Alignment_Delay_set_1 = zeros(K_sub,L,length(snr_0_set));
 for snr_del_1 = 1:length(snr_0_set)
     for ll_del1 = 1:L
@@ -213,16 +217,17 @@ for snr_del_1 = 1:length(snr_0_set)
             a_vec_AC_init_lk = A0_Array_Response_Vector(N_AC_h,N_AC_v,Azi_AC_set_init(ll_del1),Ele_AC_set_init(ll_del1),...
                 k_index_com(kk_del1,ll_del1),K,fs,fc);
             a_vec_BS_Comp_lk = A0_Array_Response_Vector_Comp_BS(Index_BS_Ant_Comp,N_BS_h,N_BS_v,N_BS_Comp,N_BS_Comp_h,N_BS_Comp_v,M_BS_Comp,M_BS_Comp_h,...
-                Est_Azi_BS_set_02(ll_del1,snr_del_1),Est_Ele_BS_set_02(ll_del1,snr_del_1),k_index_com(kk_del1,ll_del1),K,fs,fc);
+                Est_Azi_BS_set_02(ll_del1,snr_del_1),Est_Ele_BS_set_02(ll_del1,snr_del_1),k_index_com(kk_del1,ll_del1),K,fs,fc); % 
             a_vec_AC_Comp_lk = A0_Array_Response_Vector_Comp_AC(ll_del1,I_AC_h,Index_W_RF_Sub_Array,Index_AC_Ant_Comp(:,:,ll_del1),...
                 N_AC_h,N_AC_v,M_AC_h,M_AC_v,N_AC_Comp,N_AC_Comp_h,N_AC_Comp_v,M_AC_Comp,M_AC_Comp_h,...
-                Est_Azi_AC_set_02(ll_del1,snr_del_1),Est_Ele_AC_set_02(ll_del1,snr_del_1),k_index_com(kk_del1,ll_del1),K,fs,fc);
-            Equ_a_BS_ll_init_del = (a_vec_BS_init_lk.*a_vec_BS_Comp_lk)'*f_RF_BS_init_set_0(:,ll_del1,snr_del_1);
-            Equ_a_AC_ll_init_del = w_RF_AC_init_set_0(:,ll_del1,snr_del_1)'*(a_vec_AC_init_lk.*a_vec_AC_Comp_lk);
+                Est_Azi_AC_set_02(ll_del1,snr_del_1),Est_Ele_AC_set_02(ll_del1,snr_del_1),k_index_com(kk_del1,ll_del1),K,fs,fc); % 
+            Equ_a_BS_ll_init_del = (a_vec_BS_init_lk.*a_vec_BS_Comp_lk)'*f_RF_BS_init_set_0(:,ll_del1,snr_del_1); % 
+            Equ_a_AC_ll_init_del = w_RF_AC_init_set_0(:,ll_del1,snr_del_1)'*(a_vec_AC_init_lk.*a_vec_AC_Comp_lk); % 
             H_Beam_Alignment_Delay_set_1(kk_del1,ll_del1,snr_del_1) = Equ_a_AC_ll_init_del*Equ_a_BS_ll_init_del;
         end
     end
 end
+
 radial_vt_BS_set_est = lambda_z*Est_Doppler_set_02;
 n_ofdm_delay = 1:N_OFDM_Delay;
 Phase_Delay_Dop_Comp_set_0 = zeros(L,N_OFDM_Delay,length(snr_0_set));
@@ -250,6 +255,30 @@ for ii = 1:length(SNR_dBs)
                 Phase_Delay_Dop_Comp_set_0(:,:,snr_del),tau_init,fs,k_index_com,N_OFDM_Delay,Power_Tx_ii,sigma_no,awgn_en,D_subc,Ptx_gain_ii,s_tau_set);
             MSE_Delay_set_temp_0(ii,snr_del) = MSE_Delay_set_temp_0(ii,snr_del) + norm((Est_tau_set_0 - tau_init)*fs)^2/L;
             
+            if ii == 1 && iter == 1
+                Mat_ZPZ_Del = zeros(1,1,L);
+                for ll_crb_del1 = 1:L
+                    Mat_Z_Del_ll = Diff_Para_Delay(miu_tau_set_init(ll_crb_del1), k_index_com(:,ll_crb_del1));
+                    a_bar_Del = exp(1i*(k_index_com(:,ll_crb_del1)-1)*miu_tau_set_init(ll_crb_del1));
+                    Mat_P_A_orth_Del = eye(size(a_bar_Del,1)) - a_bar_Del*inv(a_bar_Del'*a_bar_Del)*a_bar_Del';
+                    Mat_ZPZ_Del(:,:,ll_crb_del1) = Mat_Z_Del_ll'*Mat_P_A_orth_Del*Mat_Z_Del_ll;
+                end
+            end
+            if iter == 1
+                CRB_miu_tau_set_temp = zeros(L,1); CRB_Delay_set_temp = zeros(L,1);
+                for ll_crb_del2 = 1:L
+                    gamma_del_ll = alpha_init(ll_crb_del2)*H_Beam_Alignment_Doppler_set_0(:,ll_crb_del2,snr_del)*exp(1i*pi*fs*tau_init(ll_crb_del2));
+                    Tx_eff_Del_set_ll = exp(1i*Phase_Delay_Dop_Comp_set_0(ll_crb_del2,:,snr_del)).'.*s_tau_set(:,ll_crb_del2); % gamma_del_ll*
+                    Mat_1D_dop_ll = 0;
+                    for nn_Del = 1:N_OFDM_Delay
+                        Mat_1D_dop_ll = Mat_1D_dop_ll + Tx_eff_Del_set_ll(nn_Del)'*Mat_ZPZ_Del(:,:,ll_crb_del2)*Tx_eff_Del_set_ll(nn_Del);
+                    end
+                    CRB_miu_tau_set_temp(ll_crb_del2) = sigma_no^2*inv(real(Mat_1D_dop_ll))/2/abs(gamma_del_ll/N_OFDM_Delay)^2; % 
+                    CRB_Delay_set_temp(ll_crb_del2) = Jacobian_Mat_Delay(:,:,ll_crb_del2)*CRB_miu_tau_set_temp(ll_crb_del2)*Jacobian_Mat_Delay(:,:,ll_crb_del2).';
+                end
+                CRB_Delay_set(ii,snr_del) = sum(CRB_Delay_set_temp)/L;
+            end
+            
             [Est_miu_tau_1,Est_tau_set_1,Y_tau_bar_set_1] = A4_Est_Delay_V1(H_Beam_Alignment_Delay_set_1(:,:,snr_del),G_ls_init,alpha_init,...
                 Phase_Delay_Dop_Comp_set_1(:,:,:,snr_del),tau_init,fs,k_index_com,N_OFDM_Delay,Power_Tx_ii,sigma_no,awgn_en,D_subc,Ptx_gain_ii,s_tau_set);
             MSE_Delay_set_temp_1(ii,snr_del) = MSE_Delay_set_temp_1(ii,snr_del) + norm((Est_tau_set_1 - tau_init)*fs)^2/L;
@@ -272,16 +301,21 @@ MarkerSize = 3;
 LineWidth = 1.2;
 Fontsize = 15;
 
+RCRB_Delay_set = sqrt(CRB_Delay_set);
 RMSE_Delay_set_0 = sqrt(MSE_Delay_set_0);
 RMSE_Delay_set_1 = sqrt(MSE_Delay_set_1);
+
 figure
 semilogy(SNR_dBs,RMSE_Delay_set_1(:,1),'--bp','LineWidth',LineWidth); hold on; grid on;
 semilogy(SNR_dBs,RMSE_Delay_set_0(:,1),'--ro','LineWidth',LineWidth);
+semilogy(SNR_dBs,RCRB_Delay_set(:,1),'--k','LineWidth',LineWidth+0.5);
 semilogy(SNR_dBs,RMSE_Delay_set_1(:,2),'-bp','LineWidth',LineWidth);
 semilogy(SNR_dBs,RMSE_Delay_set_0(:,2),'-ro','LineWidth',LineWidth);
+semilogy(SNR_dBs,RCRB_Delay_set(:,2),'-k','LineWidth',LineWidth+0.5);
 xlabel('SNR [dB]','Fontsize',Fontsize),ylabel('RMSE','Fontsize',Fontsize);
 title('Delay vs CRB','Fontsize',Fontsize);
 set(gca, 'GridLineStyle', '-.','FontSize',Fontsize, 'linewidth',1.5,'Fontname','Times New Roman');
 set(gcf, 'position', [700 300 650 550]); axis normal;
-h1 = legend('Triple squint','No triple squint','Triple squint','No triple squint','Location','southwest');
+h1 = legend('Triple squint','No triple squint','CRLB, SNR = -20 dB',...
+    'Triple squint','No triple squint','CRLB, SNR = 20 dB','Location','southwest');
 set(h1,'Fontsize',11);

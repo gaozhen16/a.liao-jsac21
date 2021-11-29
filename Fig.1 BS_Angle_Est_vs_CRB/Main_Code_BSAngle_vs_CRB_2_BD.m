@@ -180,7 +180,7 @@ end
 for ii = 1:length(SNR_dBs)
     Power_Tx_ii = (1e-3*10^(Power_Tx_dBm(ii)/10));
     Ptx_gain_ii = Ptx_gain(ii);
-    sigma_no = sqrt(10^(-(SNR_dBs(ii)/10))); % SNR_dBs(ii)
+    sigma_no = sqrt(10^(-(SNR_dBs(ii)/10)));
     tic
     for iter = 1:iterMax
         for bd = 1:3
